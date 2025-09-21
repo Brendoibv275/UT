@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIRAM-Pato - Laudo Microscópico</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 300;
+        }
+        
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .main-content {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        
+        .form-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .form-title {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .case-info {
+            background: #e3f2fd;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 2rem;
+        }
+        
+        .case-info h4 {
+            color: #1976d2;
+            margin-bottom: 0.5rem;
+        }
+        
+        .tags-section {
+            margin-bottom: 2rem;
+        }
+        
+        .section-title {
+            font-size: 1.2rem;
+            color: #34495e;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #ecf0f1;
+        }
+        
+        .tags-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .tag-item {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .tag-item:hover {
+            background: #e9ecef;
+        }
+        
+        .tag-item.selected {
+            background: #3498db;
+            color: white;
+            border-color: #2980b9;
+        }
+        
+        .tag-item input[type="checkbox"] {
+            margin-right: 0.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+            font-family: 'Times New Roman', serif;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+        }
+        
+        .btn-container {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+        
+        .btn {
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #229954;
+        }
+        
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+        
+        .btn-info {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn-info:hover {
+            background: #2980b9;
+        }
+        
+        .alert {
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .error-message {
+            color: #e74c3c;
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+        
+        .selected-tags {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+        
+        .selected-tags h4 {
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+        
+        .tag-chip {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin: 0.25rem;
+        }
+        
+        .clear-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 0.5rem;
+        }
+        
+        .clear-btn:hover {
+            background: #c0392b;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>SIRAM-Pato - Laudo Microscópico</h1>
+            <a href="{% url 'dashboard' %}" class="back-btn">← Voltar ao Dashboard</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="form-container">
+            <h2 class="form-title">Dados Microscópicos</h2>
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+            
+            <div class="case-info">
+                <h4>Informações do Caso</h4>
+                <p><strong>ID Laboratório:</strong> {{ caso.id_laboratorio }}</p>
+                <p><strong>Paciente:</strong> {{ caso.paciente.numero_prontuario }}</p>
+                <p><strong>Solicitante:</strong> {{ caso.solicitante }}</p>
+            </div>
+            
+            <form method="post" id="microForm">
+                {% csrf_token %}
+                <input type="hidden" name="texto_base_gerado" id="texto_base_gerado">
+                
+                <div class="tags-section">
+                    <h3 class="section-title">Características Microscópicas</h3>
+                    <p>Selecione as características observadas no exame microscópico:</p>
+                    
+                    <div class="tags-grid">
+                        {% for tag in tags_microscopicas %}
+                        <div class="tag-item" data-tag="{{ tag }}">
+                            <input type="checkbox" name="tags" value="{{ tag }}" id="tag_{{ forloop.counter }}">
+                            <label for="tag_{{ forloop.counter }}">{{ tag }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="selected-tags" id="selected-tags" style="display: none;">
+                        <h4>Tags Selecionadas:</h4>
+                        <div id="tags-list"></div>
+                        <button type="button" class="clear-btn" onclick="limparTags()">Limpar Todas</button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.texto_final.id_for_label }}">Laudo Microscópico:</label>
+                    {{ form.texto_final }}
+                    {% if form.texto_final.errors %}
+                        <div class="error-message">{{ form.texto_final.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.conclusao.id_for_label }}">Conclusão:</label>
+                    {{ form.conclusao }}
+                    {% if form.conclusao.errors %}
+                        <div class="error-message">{{ form.conclusao.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.notas.id_for_label }}">Notas Adicionais:</label>
+                    {{ form.notas }}
+                    {% if form.notas.errors %}
+                        <div class="error-message">{{ form.notas.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="btn-container">
+                    <button type="button" class="btn btn-info" onclick="gerarTextoBase()">Gerar Texto Base</button>
+                    <button type="submit" class="btn btn-primary">Salvar Laudo</button>
+                    <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Dicionário de textos para cada tag
+        const textosTags = {
+            'Hiperceratose': 'Os cortes histológicos mostram fragmento de mucosa revestida por epitélio pavimentoso estratificado apresentando hiperceratose.',
+            'Acantose': 'Os cortes histológicos mostram fragmento de mucosa revestida por epitélio pavimentoso estratificado apresentando acantose.',
+            'Infiltrado Inflamatório': 'Observa-se infiltrado inflamatório crônico no tecido conjuntivo subjacente.',
+            'Atipia Citológica': 'As células epiteliais apresentam atipia citológica com núcleos aumentados e hipercromáticos.',
+            'Displasia': 'O epitélio apresenta displasia de grau variável com desorganização da arquitetura celular.',
+            'Metaplasia': 'Observa-se metaplasia escamosa do epitélio de revestimento.',
+            'Necrose': 'Há áreas de necrose coagulativa no tecido examinado.',
+            'Fibrose': 'O tecido conjuntivo apresenta fibrose com aumento da deposição de colágeno.',
+            'Vasodilatação': 'Observa-se vasodilatação dos vasos sanguíneos do estroma.',
+            'Edema': 'Há edema intersticial no tecido conjuntivo.',
+            'Hemossiderose': 'Observa-se deposição de hemossiderina no tecido.',
+            'Pigmentação': 'Há pigmentação melânica no epitélio.',
+            'Calcificação': 'Observa-se calcificação distrófica no tecido.',
+            'Cistos': 'Há presença de cistos revestidos por epitélio.',
+            'Pólipos': 'Observa-se formação polipoide do tecido.',
+            'Ulceração': 'Há ulceração da superfície epitelial.',
+            'Erosão': 'Observa-se erosão superficial do epitélio.',
+            'Hiperplasia': 'O epitélio apresenta hiperplasia com aumento do número de camadas celulares.',
+            'Atrofia': 'Observa-se atrofia epitelial com diminuição da espessura do tecido.'
+        };
+        
+        function atualizarTagsSelecionadas() {
+            const checkboxes = document.querySelectorAll('input[name="tags"]:checked');
+            const tagsList = document.getElementById('tags-list');
+            const selectedTagsDiv = document.getElementById('selected-tags');
+            
+            tagsList.innerHTML = '';
+            
+            if (checkboxes.length > 0) {
+                selectedTagsDiv.style.display = 'block';
+                checkboxes.forEach(function(checkbox) {
+                    const tagChip = document.createElement('span');
+                    tagChip.className = 'tag-chip';
+                    tagChip.textContent = checkbox.value;
+                    tagsList.appendChild(tagChip);
+                });
+            } else {
+                selectedTagsDiv.style.display = 'none';
+            }
+        }
+        
+        function gerarTextoBase() {
+            const checkboxes = document.querySelectorAll('input[name="tags"]:checked');
+            let textoBase = '';
+            
+            if (checkboxes.length === 0) {
+                alert('Selecione pelo menos uma característica microscópica.');
+                return;
+            }
+            
+            checkboxes.forEach(function(checkbox, index) {
+                const tag = checkbox.value;
+                const texto = textosTags[tag];
+                
+                if (texto) {
+                    if (index > 0) {
+                        textoBase += '\n\n';
+                    }
+                    textoBase += texto;
+                }
+            });
+            
+            // Atualizar o textarea
+            const textarea = document.getElementById('id_texto_final');
+            textarea.value = textoBase;
+            
+            // Atualizar campo oculto
+            document.getElementById('texto_base_gerado').value = textoBase;
+            
+            // Scroll para o textarea
+            textarea.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function limparTags() {
+            const checkboxes = document.querySelectorAll('input[name="tags"]');
+            checkboxes.forEach(function(checkbox) {
+                checkbox.checked = false;
+            });
+            atualizarTagsSelecionadas();
+        }
+        
+        // Adicionar event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkboxes = document.querySelectorAll('input[name="tags"]');
+            
+            checkboxes.forEach(function(checkbox) {
+                checkbox.addEventListener('change', function() {
+                    const tagItem = this.closest('.tag-item');
+                    if (this.checked) {
+                        tagItem.classList.add('selected');
+                    } else {
+                        tagItem.classList.remove('selected');
+                    }
+                    atualizarTagsSelecionadas();
+                });
+            });
+            
+            // Carregar dados existentes se houver
+            {% if laudo_micro and laudo_micro.tags_selecionadas %}
+                const tagsExistentes = {{ laudo_micro.tags_selecionadas|safe }};
+                tagsExistentes.forEach(function(tag) {
+                    const checkbox = document.querySelector('input[value="' + tag + '"]');
+                    if (checkbox) {
+                        checkbox.checked = true;
+                        checkbox.closest('.tag-item').classList.add('selected');
+                    }
+                });
+                atualizarTagsSelecionadas();
+            {% endif %}
+        });
+    </script>
+</body>
+</html>

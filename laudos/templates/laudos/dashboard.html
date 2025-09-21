@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIRAM-Pato - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 300;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .user-role {
+            background: rgba(255,255,255,0.2);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+        
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .main-content {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .dashboard-title {
+            font-size: 1.5rem;
+            color: #2c3e50;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+            flex: 1;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .stat-label {
+            color: #7f8c8d;
+            margin-top: 0.5rem;
+        }
+        
+        .create-case-btn {
+            background: #27ae60;
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        .create-case-btn:hover {
+            background: #229954;
+        }
+        
+        .cases-table {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .table-header {
+            background: #34495e;
+            color: white;
+            padding: 1rem;
+            font-weight: bold;
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .table th,
+        .table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        .table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .table tbody tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+        
+        .status-recebido {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .status-em_macroscopia {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+        
+        .status-em_microscopia {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+        
+        .status-aguardando_aprovacao {
+            background: #fff8e1;
+            color: #f9a825;
+        }
+        
+        .status-finalizado {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        
+        .no-cases {
+            text-align: center;
+            padding: 3rem;
+            color: #7f8c8d;
+        }
+        
+        .no-cases h3 {
+            margin-bottom: 1rem;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn-small {
+            padding: 0.25rem 0.75rem;
+            border: none;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+        
+        .btn-view {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn-edit {
+            background: #f39c12;
+            color: white;
+        }
+        
+        .btn-approve {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .btn-pdf {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .btn-view:hover,
+        .btn-edit:hover,
+        .btn-approve:hover,
+        .btn-pdf:hover {
+            opacity: 0.8;
+        }
+        
+        .restricted-access {
+            color: #e74c3c;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>SIRAM-Pato</h1>
+            <div class="user-info">
+                <span>Olá, {{ user.username }}</span>
+                <span class="user-role">{{ user.get_role_display }}</span>
+                <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="dashboard-header">
+            <h2 class="dashboard-title">Dashboard</h2>
+            <a href="{% url 'criar_caso' %}" class="create-case-btn">+ Criar Novo Caso</a>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number">{{ total_casos }}</div>
+                <div class="stat-label">Total de Casos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ casos|length }}</div>
+                <div class="stat-label">Casos Visíveis</div>
+            </div>
+        </div>
+
+        <div class="cases-table">
+            <div class="table-header">
+                Lista de Casos
+            </div>
+            
+            {% if casos %}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID Laboratório</th>
+                            <th>Número do Prontuário</th>
+                            <th>Data de Nascimento</th>
+                            <th>Sexo</th>
+                            <th>Solicitante</th>
+                            <th>Status</th>
+                            <th>Data Recebimento</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for caso in casos %}
+                        <tr>
+                            <td>{{ caso.id_laboratorio }}</td>
+                            <td>
+                                {% if caso.paciente_anonimizado.numero_prontuario == '***' %}
+                                    <span class="restricted-access">Acesso Restrito</span>
+                                {% else %}
+                                    {{ caso.paciente_anonimizado.numero_prontuario }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if caso.paciente_anonimizado.data_nascimento == '***' %}
+                                    <span class="restricted-access">Acesso Restrito</span>
+                                {% else %}
+                                    {{ caso.paciente_anonimizado.data_nascimento }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if caso.paciente_anonimizado.sexo == '***' %}
+                                    <span class="restricted-access">Acesso Restrito</span>
+                                {% else %}
+                                    {{ caso.paciente_anonimizado.sexo }}
+                                {% endif %}
+                            </td>
+                            <td>{{ caso.solicitante }}</td>
+                            <td>
+                                <span class="status-badge status-{{ caso.status|lower }}">
+                                    {{ caso.get_status_display }}
+                                </span>
+                            </td>
+                            <td>{{ caso.data_recebimento|date:"d/m/Y" }}</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <a href="{% url 'editar_laudo' caso.id_laboratorio %}" class="btn-small btn-view">Editar Laudo</a>
+                                    
+                                    {% if caso.status == 'AGUARDANDO_APROVACAO' and user.role in 'PROFESSOR,ADMIN' %}
+                                        <form method="post" action="{% url 'aprovar_laudo' caso.id_laboratorio %}" style="display: inline;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn-small btn-approve" onclick="return confirm('Tem certeza que deseja aprovar este laudo?')">
+                                                Aprovar
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                    
+                                    {% if caso.status == 'FINALIZADO' %}
+                                        <a href="{% url 'gerar_pdf' caso.id_laboratorio %}" class="btn-small btn-pdf" target="_blank">
+                                            📄 Gerar PDF
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="no-cases">
+                    <h3>Nenhum caso encontrado</h3>
+                    <p>Comece criando um novo caso clicando no botão acima.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

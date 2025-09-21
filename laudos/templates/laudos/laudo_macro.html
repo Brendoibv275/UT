@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIRAM-Pato - Laudo Macroscópico</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 300;
+        }
+        
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .main-content {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        
+        .form-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .preview-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .form-title {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .preview-title {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .preview-content {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 1rem;
+            min-height: 300px;
+            font-family: 'Times New Roman', serif;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+        
+        .btn-container {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+        
+        .btn {
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #229954;
+        }
+        
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+        
+        .alert {
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .error-message {
+            color: #e74c3c;
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+        
+        .case-info {
+            background: #e3f2fd;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+        
+        .case-info h4 {
+            color: #1976d2;
+            margin-bottom: 0.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>SIRAM-Pato - Laudo Macroscópico</h1>
+            <a href="{% url 'dashboard' %}" class="back-btn">← Voltar ao Dashboard</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="form-container">
+            <h2 class="form-title">Dados Macroscópicos</h2>
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+            
+            <div class="case-info">
+                <h4>Informações do Caso</h4>
+                <p><strong>ID Laboratório:</strong> {{ caso.id_laboratorio }}</p>
+                <p><strong>Paciente:</strong> {{ caso.paciente.numero_prontuario }}</p>
+                <p><strong>Solicitante:</strong> {{ caso.solicitante }}</p>
+            </div>
+            
+            <form method="post" id="macroForm">
+                {% csrf_token %}
+                <input type="hidden" name="texto_gerado" id="texto_gerado">
+                
+                <div class="form-group">
+                    <label for="{{ form.tipo_tecido.id_for_label }}">Tipo de Tecido:</label>
+                    {{ form.tipo_tecido }}
+                    {{ form.tipo_tecido_personalizado }}
+                    {% if form.tipo_tecido.errors %}
+                        <div class="error-message">{{ form.tipo_tecido.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.num_fragmentos.id_for_label }}">Número de Fragmentos:</label>
+                    {{ form.num_fragmentos }}
+                    {% if form.num_fragmentos.errors %}
+                        <div class="error-message">{{ form.num_fragmentos.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.dim_comprimento_mm.id_for_label }}">Comprimento (mm):</label>
+                        {{ form.dim_comprimento_mm }}
+                        {% if form.dim_comprimento_mm.errors %}
+                            <div class="error-message">{{ form.dim_comprimento_mm.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.dim_largura_mm.id_for_label }}">Largura (mm):</label>
+                        {{ form.dim_largura_mm }}
+                        {% if form.dim_largura_mm.errors %}
+                            <div class="error-message">{{ form.dim_largura_mm.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                <label for="{{ form.dim_altura_mm.id_for_label }}">Altura (mm):</label>
+                {{ form.dim_altura_mm }}
+                {% if form.dim_altura_mm.errors %}
+                    <div class="error-message">{{ form.dim_altura_mm.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.cor.id_for_label }}">Cor:</label>
+                    {{ form.cor }}
+                    {{ form.cor_personalizada }}
+                    {% if form.cor.errors %}
+                        <div class="error-message">{{ form.cor.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.consistencia.id_for_label }}">Consistência:</label>
+                    {{ form.consistencia }}
+                    {{ form.consistencia_personalizada }}
+                    {% if form.consistencia.errors %}
+                        <div class="error-message">{{ form.consistencia.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.forma.id_for_label }}">Forma:</label>
+                    {{ form.forma }}
+                    {{ form.forma_personalizada }}
+                    {% if form.forma.errors %}
+                        <div class="error-message">{{ form.forma.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="btn-container">
+                    <button type="submit" class="btn btn-primary">Salvar e Continuar</button>
+                    <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+        
+        <div class="preview-container">
+            <h3 class="preview-title">Laudo Macroscópico</h3>
+            <p style="color: #7f8c8d; margin-bottom: 1rem; font-size: 0.9rem;">
+                O texto é gerado automaticamente. Você pode editá-lo conforme necessário:
+            </p>
+            <textarea id="preview-macro" class="preview-content" style="resize: vertical; min-height: 300px;">
+O material recebido para exame consta de fragmento(s) de tecido...
+            </textarea>
+        </div>
+    </div>
+
+    <script>
+        function mostrarCampoPersonalizado(selectId, campoPersonalizadoId) {
+            const select = document.getElementById(selectId);
+            const campoPersonalizado = document.getElementById(campoPersonalizadoId);
+            
+            if (select.value === 'descrever') {
+                campoPersonalizado.style.display = 'block';
+                campoPersonalizado.required = true;
+            } else {
+                campoPersonalizado.style.display = 'none';
+                campoPersonalizado.required = false;
+                campoPersonalizado.value = '';
+            }
+        }
+        
+        function obterValorCampo(selectId, campoPersonalizadoId) {
+            const select = document.getElementById(selectId);
+            const campoPersonalizado = document.getElementById(campoPersonalizadoId);
+            
+            if (select.value === 'descrever') {
+                return campoPersonalizado.value || '';
+            } else {
+                return select.value || '';
+            }
+        }
+        
+        function gerarTextoMacroscopico() {
+            const tipoTecido = obterValorCampo('id_tipo_tecido', 'id_tipo_tecido_personalizado');
+            const numFragmentos = document.getElementById('id_num_fragmentos').value || '1';
+            const comprimento = document.getElementById('id_dim_comprimento_mm').value || '0';
+            const largura = document.getElementById('id_dim_largura_mm').value || '0';
+            const altura = document.getElementById('id_dim_altura_mm').value || '0';
+            const cor = obterValorCampo('id_cor', 'id_cor_personalizada');
+            const consistencia = obterValorCampo('id_consistencia', 'id_consistencia_personalizada');
+            const forma = obterValorCampo('id_forma', 'id_forma_personalizada');
+            
+            let texto = 'O material recebido para exame consta de ';
+            
+            if (numFragmentos === '1') {
+                texto += 'fragmento de ';
+            } else {
+                texto += `${numFragmentos} fragmentos de `;
+            }
+            
+            if (tipoTecido) {
+                if (tipoTecido === 'mole') {
+                    texto += 'tecido mole ';
+                } else if (tipoTecido === 'osseo') {
+                    texto += 'tecido ósseo ';
+                } else if (tipoTecido === 'duro') {
+                    texto += 'tecido duro ';
+                } else {
+                    texto += `${tipoTecido} `;
+                }
+            }
+            
+            if (comprimento && largura && altura) {
+                texto += `medindo ${comprimento} x ${largura} x ${altura} mm `;
+            }
+            
+            if (cor) {
+                texto += `de cor ${cor} `;
+            }
+            
+            if (consistencia) {
+                texto += `e consistência ${consistencia} `;
+            }
+            
+            if (forma) {
+                texto += `com forma ${forma}`;
+            }
+            
+            texto += '.';
+            
+            // Atualizar preview
+            document.getElementById('preview-macro').value = texto;
+            
+            // Atualizar campo oculto
+            document.getElementById('texto_gerado').value = texto;
+        }
+        
+        function sincronizarTexto() {
+            // Sincronizar mudanças no textarea com o campo oculto
+            const textarea = document.getElementById('preview-macro');
+            const campoOculto = document.getElementById('texto_gerado');
+            campoOculto.value = textarea.value;
+        }
+        
+        // Adicionar event listeners a todos os campos
+        document.addEventListener('DOMContentLoaded', function() {
+            const campos = ['id_num_fragmentos', 'id_dim_comprimento_mm', 'id_dim_largura_mm', 
+                          'id_dim_altura_mm', 'id_tipo_tecido', 'id_cor', 'id_consistencia', 'id_forma'];
+            
+            campos.forEach(function(campoId) {
+                const campo = document.getElementById(campoId);
+                if (campo) {
+                    campo.addEventListener('input', gerarTextoMacroscopico);
+                    campo.addEventListener('change', gerarTextoMacroscopico);
+                }
+            });
+            
+            // Campos personalizados
+            const camposPersonalizados = ['id_tipo_tecido_personalizado', 'id_cor_personalizada', 
+                                        'id_consistencia_personalizada', 'id_forma_personalizada'];
+            
+            camposPersonalizados.forEach(function(campoId) {
+                const campo = document.getElementById(campoId);
+                if (campo) {
+                    campo.addEventListener('input', gerarTextoMacroscopico);
+                }
+            });
+            
+            // Event listeners para mostrar/ocultar campos personalizados
+            document.getElementById('id_tipo_tecido').addEventListener('change', function() {
+                mostrarCampoPersonalizado('id_tipo_tecido', 'id_tipo_tecido_personalizado');
+                gerarTextoMacroscopico();
+            });
+            
+            document.getElementById('id_cor').addEventListener('change', function() {
+                mostrarCampoPersonalizado('id_cor', 'id_cor_personalizada');
+                gerarTextoMacroscopico();
+            });
+            
+            document.getElementById('id_consistencia').addEventListener('change', function() {
+                mostrarCampoPersonalizado('id_consistencia', 'id_consistencia_personalizada');
+                gerarTextoMacroscopico();
+            });
+            
+            document.getElementById('id_forma').addEventListener('change', function() {
+                mostrarCampoPersonalizado('id_forma', 'id_forma_personalizada');
+                gerarTextoMacroscopico();
+            });
+            
+            // Event listener para o textarea editável
+            document.getElementById('preview-macro').addEventListener('input', sincronizarTexto);
+            
+            // Gerar texto inicial
+            gerarTextoMacroscopico();
+        });
+    </script>
+</body>
+</html>

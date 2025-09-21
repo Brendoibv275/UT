@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="SIRAM-Pato" version="1.0">
+  <description>
+    Plano de ação detalhado para a construção do Sistema Inteligente de Geração de Laudos Anatomopatológicos (SIRAM-Pato).
+    Este plano foi desenhado para ser executado em sequência, garantindo que cada componente seja construído sobre uma base sólida.
+    O objetivo é criar uma aplicação monolítica em Python/Django com automação inteligente no centro do fluxo de trabalho.
+  </description>
+
+  <architecture>
+    <stack>
+      <framework_principal>Django (Python)</framework_principal>
+      <banco_de_dados>MariaDB</banco_de_dados>
+      <frontend>Templates Nativos do Django (HTML/CSS)</frontend>
+      <interatividade>JavaScript Mínimo (Vanilla JS) para automação em tempo real.</interatividade>
+      <geracao_pdf>Biblioteca Python WeasyPrint</geracao_pdf>
+    </stack>
+    <conexao>
+      Django se conecta ao MariaDB através de um driver de banco de dados (mysqlclient).
+      O Frontend é renderizado diretamente pelo Django, eliminando a necessidade de uma API REST interna.
+      O JavaScript opera no lado do cliente para interatividade, sem recarregar a página.
+    </conexao>
+  </architecture>
+
+  <step number="1" title="Fundação do Projeto e Modelagem de Dados">
+    <task name="1.1: Configuração do Ambiente de Desenvolvimento">
+      <details>
+        1. Crie o diretório do projeto: `mkdir siram_pato_project && cd siram_pato_project`
+        2. Crie e ative um ambiente virtual: `python -m venv venv` e `source venv/bin/activate` (ou `venv\Scripts\activate` no Windows).
+        3. Instale as dependências essenciais: `pip install Django mysqlclient WeasyPrint`.
+      </details>
+    </task>
+    <task name="1.2: Criação do Projeto e App Django">
+      <details>
+        1. Crie o projeto Django: `django-admin startproject siram_pato .`
+        2. Crie o aplicativo principal que conterá a lógica dos laudos: `python manage.py startapp laudos`.
+        3. Adicione o novo app 'laudos' à lista de `INSTALLED_APPS` no arquivo `siram_pato/settings.py`.
+      </details>
+    </task>
+    <task name="1.3: Configuração do Banco de Dados MariaDB">
+      <details>
+        1. No seu servidor MariaDB, crie um novo banco de dados: `CREATE DATABASE siram_pato_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`
+        2. Crie um usuário para a aplicação: `CREATE USER 'siram_user'@'localhost' IDENTIFIED BY 'senha_forte';`
+        3. Dê as permissões necessárias: `GRANT ALL PRIVILEGES ON siram_pato_db.* TO 'siram_user'@'localhost';`
+        4. Atualize a seção `DATABASES` no arquivo `siram_pato/settings.py` com as credenciais do MariaDB.
+      </details>
+    </task>
+    <task name="1.4: Desenvolvimento dos Modelos de Dados (laudos/models.py)">
+      <details>
+        - Este é o blueprint do banco de dados. O código a seguir deve ser escrito no arquivo `laudos/models.py`.
+        - A estrutura armazena tanto as seleções (para análise de dados futura) quanto o texto gerado.
+
+        <![CDATA[
+from django.contrib.auth.models import AbstractUser
+from django.db import models
+
+class UsuarioCustomizado(AbstractUser):
+    ROLE_CHOICES = [
+        ('ADMIN', 'Administrador'),
+        ('PROFESSOR', 'Professor'),
+        ('ALUNO_N2', 'Aluno Nível 2'),
+        ('ALUNO', 'Aluno'),
+        ('FUNCIONARIO_LAB', 'Funcionário do Laboratório'),
+    ]
+    role = models.CharField(max_length=15, choices=ROLE_CHOICES, default='ALUNO')
+
+class Paciente(models.Model):
+    numero_prontuario = models.CharField(max_length=50, unique=True, primary_key=True)
+    data_nascimento = models.DateField()
+    SEXO_CHOICES = [('M', 'Masculino'), ('F', 'Feminino'), ('O', 'Outro')]
+    sexo = models.CharField(max_length=1, choices=SEXO_CHOICES)
+
+class Caso(models.Model):
+    STATUS_CHOICES = [
+        ('RECEBIDO', 'Recebido'),
+        ('EM_MACROSCOPIA', 'Em Macroscopia'),
+        ('EM_MICROSCOPIA', 'Em Microscopia'),
+        ('AGUARDANDO_APROVACAO', 'Aguardando Aprovação'),
+        ('FINALIZADO', 'Finalizado'),
+    ]
+    id_laboratorio = models.CharField(max_length=20, unique=True, primary_key=True)
+    paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE, related_name='casos')
+    data_recebimento = models.DateField()
+    solicitante = models.CharField(max_length=255)
+    diagnostico_sugerido = models.TextField(blank=True, null=True)
+    observacoes_clinicas = models.TextField(blank=True, null=True)
+    status = models.CharField(max_length=25, choices=STATUS_CHOICES, default='RECEBIDO')
+    criado_por = models.ForeignKey(UsuarioCustomizado, on_delete=models.SET_NULL, null=True, related_name='casos_criados')
+    responsavel_final = models.ForeignKey(UsuarioCustomizado, on_delete=models.SET_NULL, null=True, blank=True, related_name='casos_finalizados')
+    data_criacao = models.DateTimeField(auto_now_add=True)
+    data_finalizacao = models.DateTimeField(null=True, blank=True)
+
+class LaudoMacroscopico(models.Model):
+    caso = models.OneToOneField(Caso, on_delete=models.CASCADE, related_name='laudo_macroscopico')
+    num_fragmentos = models.PositiveIntegerField(default=1)
+    dim_comprimento_cm = models.DecimalField(max_digits=5, decimal_places=2)
+    dim_largura_cm = models.DecimalField(max_digits=5, decimal_places=2)
+    dim_altura_cm = models.DecimalField(max_digits=5, decimal_places=2)
+    cor = models.CharField(max_length=100)
+    consistencia = models.CharField(max_length=100)
+    forma = models.CharField(max_length=100)
+    texto_gerado = models.TextField()
+    texto_editado = models.TextField(blank=True, null=True)
+
+class LaudoMicroscopico(models.Model):
+    caso = models.OneToOneField(Caso, on_delete=models.CASCADE, related_name='laudo_microscopico')
+    tags_selecionadas = models.JSONField(default=list)
+    texto_base_gerado = models.TextField()
+    texto_final = models.TextField()
+    conclusao = models.TextField()
+    notas = models.TextField(blank=True, null=True)
+
+class LogAtividade(models.Model):
+    usuario = models.ForeignKey(UsuarioCustomizado, on_delete=models.SET_NULL, null=True)
+    acao = models.CharField(max_length=255)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    detalhes = models.TextField()
+        ]]>
+      </details>
+    </task>
+    <task name="1.5: Migração do Banco de Dados e Criação do Superusuário">
+      <details>
+        1. No terminal, execute: `python manage.py makemigrations laudos`.
+        2. Em seguida, aplique as migrações: `python manage.py migrate`.
+        3. Crie o primeiro usuário (Admin): `python manage.py createsuperuser`.
+        4. Registre os modelos no arquivo `laudos/admin.py` para torná-los visíveis na interface de administração.
+      </details>
+    </task>
+  </step>
+
+  <step number="2" title="Autenticação, Permissões e Interface Principal">
+    <task name="2.1: Configuração das URLs de Autenticação">
+        <details>No arquivo `siram_pato/urls.py`, inclua as URLs de autenticação do Django: `path('accounts/', include('django.contrib.auth.urls'))`.</details>
+    </task>
+    <task name="2.2: Criação dos Templates de Autenticação">
+        <details>Crie os arquivos HTML para login (`templates/registration/login.html`), logout, etc. O Django os usará automaticamente.</details>
+    </task>
+    <task name="2.3: Criação da View e Template do Dashboard">
+        <details>Em `laudos/views.py`, crie a `dashboard_view` que busca os casos e aplica a lógica de anonimização. Crie o template `templates/dashboard.html` para exibir a lista de casos.</details>
+    </task>
+  </step>
+
+  <step number="3" title="Implementação da Automação de Laudos">
+      <task name="3.1: Construtor Macroscópico (View + Template + JS)">
+          <details>
+              1. Crie a view `laudo_macro_view` que lida com a criação e edição do laudo.
+              2. Crie o template `laudo_macro.html` com os campos de formulário (selects, inputs) e a área de preview.
+              3. Escreva o script JavaScript que monitora os campos e atualiza o preview em tempo real.
+          </details>
+      </task>
+      <task name="3.2: Construtor Microscópico (View + Template + JS)">
+          <details>
+              1. Crie a view `laudo_micro_view`.
+              2. Crie o template `laudo_micro.html` com a interface de seleção de tags (checkboxes).
+              3. Escreva o script JavaScript que gera o texto base a partir das tags e o insere em um `<textarea>` editável.
+          </details>
+      </task>
+  </step>
+  
+  <step number="4" title="Implementação das Regras de Negócio">
+      <task name="4.1: Proteção das Views">
+          <details>Adicione os decorators `@login_required` e `@user_passes_test` nas funções de view em `laudos/views.py` para restringir o acesso com base no `role` do usuário.</details>
+      </task>
+      <task name="4.2: Lógica de Aprovação de Laudos">
+          <details>Crie a view `aprovar_laudo_view` que muda o status do caso, define o `responsavel_final` e a `data_finalizacao`, e cria um registro no `LogAtividade`.</details>
+      </task>
+  </step>
+
+  <step number="5" title="Geração do Laudo Final em PDF">
+      <task name="5.1: Criação do Template HTML para o PDF">
+          <details>Desenvolva um arquivo `laudo_pdf.html` que seja estilizado com CSS para se parecer exatamente com os laudos de exemplo. Use placeholders como `{{ caso.paciente.numero_prontuario }}`.</details>
+      </task>
+      <task name="5.2: Criação da View de Geração de PDF">
+          <details>
+              1. Crie a `gerar_pdf_view` em `laudos/views.py`.
+              2. A view irá renderizar o template `laudo_pdf.html` com os dados do caso.
+              3. Usará a biblioteca WeasyPrint para converter o HTML renderizado em um objeto PDF.
+              4. Retornará uma `HttpResponse` com o tipo de conteúdo `application/pdf` para iniciar o download no navegador.
+          </details>
+      </task>
+  </step>
+  
+  <step number="6" title="Finalização e Implantação">
+      <task name="6.1: Testes Funcionais">
+          <details>Realize testes manuais completos, logando com cada um dos 5 perfis de usuário para garantir que as permissões, visualizações e funcionalidades de automação estão corretas.</details>
+      </task>
+      <task name="6.2: Documentação de Implantação">
+          <details>Crie um arquivo `DEPLOYMENT.md` com as instruções para configurar o projeto em um servidor de produção (configuração de servidor web, variáveis de ambiente, etc.).</details>
+      </task>
+  </step>
+</project>
